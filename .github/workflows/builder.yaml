@@ -16,7 +16,7 @@ permissions:
 
 env:
   REGISTRY: public.ecr.aws/y8l1o1z1
-  IMAGE_NAME: orbbec_camera
+  IMAGE_NAME: orbbec-camera
 
 jobs:
   image-builder:
