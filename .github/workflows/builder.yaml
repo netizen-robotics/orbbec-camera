@@ -1,4 +1,4 @@
-name: Docker image build for ROS2
+name: Docker image build for Orbbec Camera on ROS2
 
 on:
   workflow_call:
