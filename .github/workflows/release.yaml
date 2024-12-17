@@ -1,0 +1,13 @@
+name: ROS2 image release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release-jazzy:
+    uses: ./.github/workflows/builder.yaml
+    with:
+      ros_distro: jazzy
+      environment: jazzy
+    secrets: inherit

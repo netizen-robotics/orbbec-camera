@@ -1,0 +1,67 @@
+name: Docker image build for ROS2
+
+on:
+  workflow_call:
+    inputs:
+      ros_distro:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  REGISTRY: public.ecr.aws/y8l1o1z1
+  IMAGE_NAME: orbbec_camera
+
+jobs:
+  image-builder:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Git clone repository
+        uses: actions/checkout@v4
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-actions-session
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
+          labels: |
+            org.opencontainers.image.title=Netizen Robotics ROS2 ${{ inputs.ros_distro }} - Orbbec Camera
+            org.opencontainers.image.description=Docker for robots using Orbbec Camera developed by Netizen Robotics.
+            org.opencontainers.image.vendor=Netizen Robotics
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          no-cache: true
+          build-args: |
+            ROS2_DISTRO=${{ inputs.ros_distro }}
+          platforms: linux/arm64,linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
