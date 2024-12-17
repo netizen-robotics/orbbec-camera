@@ -1,4 +1,4 @@
-name: ROS2 image release
+name: ROS2 image release for Orbbec Camera
 
 on:
   release:
